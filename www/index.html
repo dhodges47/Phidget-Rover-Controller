@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Stalker OS</title>
+</head>
+
+<body>
+    <script src="/js/socket.io.js"></script>
+    <script>
+        var socket = io('http://localhost:3000');
+        socket.on('news', function (data) {
+            console.log(data);
+            socket.emit('my other event', { my: 'data' });
+        });
+        sendMessage = function () {
+            socket.emit('chat message', $('#m').val());
+            $('#m').val('');
+            return false;
+        }
+    </script>
+
+    <h1>Hello Stalker!</h1>
+</body>
+
+</html>

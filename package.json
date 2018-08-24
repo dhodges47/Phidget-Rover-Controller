@@ -1,0 +1,15 @@
+{
+  "name": "stalker",
+  "version": "0.1.0",
+  "description": "Controller for 4 motor rover",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Hodges",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "socket.io": "^2.1.1"
+  }
+}
