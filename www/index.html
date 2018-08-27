@@ -3,24 +3,83 @@
 
 <head>
     <title>Stalker OS</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" media="screen" href="/css/site.css" />
+    <script src="/js/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <!-- Bootstrap: Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+
+    <!-- Bootstrap Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+        crossorigin="anonymous">
+
+    <!-- Bootstrap Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <script src="/js/socket.io.js"></script>
+
     <script>
-        var socket = io('http://localhost:3000');
-        socket.on('news', function (data) {
-            console.log(data);
-            socket.emit('my other event', { my: 'data' });
+        $(function () {
+
+            const socket = io('http://localhost:3000');
+
+
+            socket.on('news', function (data) {
+                console.log(data);
+                socket.emit('my other event', { my: 'data' });
+            });
+            socket.on('connectionStatus', function (data) {
+                UpdateStalkerConnectionStatus(data);
+
+                console.log(data);
+            })
+            sendMessage = function () {
+                socket.emit('chat message', $('#m').val());
+                $('#m').val('');
+                return false;
+            };
+            btnConnect_onClick = function () {
+                var b1 = socket.connected;
+                $('#ledConnectionStatus').attr('class', 'led-yellow');
+                socket.emit('connectStalker', 'true');
+                return false;
+            };
+            btnDisConnect_onClick = function () {
+                $('#ledConnectionStatus').attr('class', 'led-yellow');
+                socket.emit('connectStalker', { setting: 'false' });
+                return false;
+            };
+            console.log("ready!");
         });
-        sendMessage = function () {
-            socket.emit('chat message', $('#m').val());
-            $('#m').val('');
-            return false;
+        UpdateStalkerConnectionStatus = function (data) {
+            if (data == "Stalker is connected") {
+                $('#ledConnectionStatus').attr('class', 'led-green');
+            }
+            else {
+                $('#ledConnectionStatus').attr('class', 'led-red');
+            }
         }
     </script>
+    <div class="container">
+        <h1>Hello Stalker!</h1>
 
-    <h1>Hello Stalker!</h1>
+        <div class="led-box">
+            <div id="ledConnectionStatus" class="led-red"></div>
+            <p>Stalker Connection Status</p>
+        </div>
+        <div style='clear:both; height:20px;'></div>
+
+        <button type="button" id="btnConnect" onclick="btnConnect_onClick();">Connect to Stalker</button>
+        <button type="button" id="btnDisConnect" onclick="btnDisConnect_onClick();">DisConnect Stalker</button>
+    </div>
+
 </body>
 
 </html>

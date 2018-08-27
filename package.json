@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3",
+    "phidget22": "^2.0.7",
     "socket.io": "^2.1.1"
   }
 }
