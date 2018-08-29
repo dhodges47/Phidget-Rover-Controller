@@ -1,6 +1,7 @@
 const phidget22 = require('phidget22');
 const express = require('express')
 const pubsub = require('pubsub-js');
+const global = require('./constants')
 const app = express()
 var debug = require('debug')('stalker:server');
 const url = require('url');
@@ -9,9 +10,6 @@ const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const port = 3000
-// pubsub topics
-const roverconnection_command = "rcc" // send connect/disconnect commands from web page via sockets to phidget controller
-const roverconnection_status = "rcs"  // send phidget connection status back to sockets controller to send to web page
 
 app.use(express.static(__dirname + '/www'));
 var http = require('http');
@@ -44,8 +42,8 @@ const socketServer = function () {
     socket.on('connectStalker', function (data) {
       if (data == 'true') {
         console.log("connection request received")
-        pubsub.publish(roverconnection_command, "connect");
-        pubsub.subscribe(roverconnection_status, function (msg, data) {
+        pubsub.publish(global.roverconnection_command, "connect");
+        pubsub.subscribe(global.roverconnection_status, function (msg, data) {
           if (data == "connected") {
             socket.emit('connectionStatus', 'Stalker is connected');
           }
@@ -54,8 +52,8 @@ const socketServer = function () {
       }
       else {
         console.log("disconnect request received")
-        pubsub.publish(roverconnection_command, "disconnect");
-        pubsub.subscribe(roverconnection_status, function (msg, data) {
+        pubsub.publish(global.roverconnection_command, "disconnect");
+        pubsub.subscribe(global.roverconnection_status, function (msg, data) {
           if (data == "disconnected") {
             socket.emit('connectionStatus', 'Stalker is not connected');
           }
@@ -77,12 +75,12 @@ const setConnectionStatus = function (status) {
 }
 const phidgetServer = function () {
   var conn = new phidget22.Connection(5661, 'raspberrypi.local');
-  pubsub.subscribe(roverconnection_command, function (msg, data) {
+  pubsub.subscribe(global.roverconnection_command, function (msg, data) {
     console.log(data)
     if (data == "connect") {
       conn.connect().then(function () {
         console.log('Connection connected');
-        pubsub.publish(roverconnection_status, "connected");
+        pubsub.publish(global.roverconnection_status, "connected");
         //	startMotors();
       }).catch(function (err) {
         console.log('failed to connect to server:' + err);
@@ -91,11 +89,11 @@ const phidgetServer = function () {
     else if (data == "disconnect")
     {
       conn.close()
-        pubsub.publish(roverconnection_status, "disconnected");
+        pubsub.publish(global.roverconnection_status, "disconnected");
     }
   });
   conn.onDisconnect(function () {
-    pubsub.publish(roverconnection_status, "disconnected");
+    pubsub.publish(global.roverconnection_status, "disconnected");
   });
 
 }
