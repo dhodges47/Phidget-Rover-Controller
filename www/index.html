@@ -56,6 +56,11 @@
                 socket.emit('connectStalker', { setting: 'false' });
                 return false;
             };
+            $('#sliderVelocity').change(function () {
+				var newVelocity = $(this).val();
+				$('#lblVelocity').text(newVelocity);
+				socket.emit('velocity', newVelocity)
+			});
             console.log("ready!");
         });
         UpdateStalkerConnectionStatus = function (data) {
@@ -78,6 +83,72 @@
 
         <button type="button" id="btnConnect" onclick="btnConnect_onClick();">Connect to Stalker</button>
         <button type="button" id="btnDisConnect" onclick="btnDisConnect_onClick();">DisConnect Stalker</button>
+        <div>
+			<h3>Motor One</h3>
+			<span id="lblMotorOneStatus"></span>
+
+		</div>
+		<div>
+			<h3>Motor Two</h3>
+			<span id="lblMotorTwoStatus"></span>
+        </div>
+        <div>
+			<h3>Motor Three</h3>
+			<span id="lblMotorThreeStatus"></span>
+        </div>
+        <div>
+			<h3>Motor Four</h3>
+			<span id="lblMotorFourStatus"></span>
+        </div>
+		<div>
+			<h3>Velocity:</h3>
+			<form id="form1" oninput="velocity.value = sliderVelocity.valueAsNumber">
+				<output name="velocity" id="velocity" for="sliderVelocity" class="outputVariable">0</output>
+				<br>
+				<span class="sliderLabel">Backwards</span>
+				<input id="sliderVelocity" name="sliderVelocity" type="range" min="-100" max="100" step="10" value="0"
+				 style="width:500px;" list="listTicks" />
+				<span class="sliderLabel"> Forwards</span>
+
+
+				<datalist id="listTicks">
+					<option label="Stopped">0</option>
+
+					<option>-20</option>
+
+					<option>-40</option>
+
+					<option>-60</option>
+
+					<option>-80</option>
+
+					<option>-100</option>
+
+					<option>20</option>
+
+					<option>40</option>
+
+					<option>60</option>
+
+					<option>80</option>
+
+					<option>100</option>
+				</datalist>
+			</form>
+		</div>
+		<div>
+			<h3>Steering</h3>
+			<form id="form2" oninput="steerVector.value = sliderSteering.valueAsNumber">
+				<output name="steerVector" id="steerVector" for="sliderSteering" class="outputVariable">0</output>
+				<br>
+				<span class="sliderLabel"> Left</span>
+				<input id="sliderSteering" name="sliderSteering" type="range" min="-5" max="5" step="1" value="0" style="width:500px;"
+				/>
+				<span class="sliderLabel"> Right</span>
+
+			</form>
+
+		</div>
     </div>
 
 </body>

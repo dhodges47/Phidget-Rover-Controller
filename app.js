@@ -1,7 +1,7 @@
-const phidget22 = require('phidget22');
 const express = require('express')
 const pubsub = require('pubsub-js');
-const global = require('./constants')
+const global = require('./constants');
+const phidget = require('./phidgetServer');
 const app = express()
 var debug = require('debug')('stalker:server');
 const url = require('url');
@@ -41,24 +41,28 @@ const socketServer = function () {
 
     socket.on('connectStalker', function (data) {
       if (data == 'true') {
-        console.log("connection request received")
+        console.log("connection request received");
         pubsub.publish(global.roverconnection_command, "connect");
-        pubsub.subscribe(global.roverconnection_status, function (msg, data) {
-          if (data == "connected") {
-            socket.emit('connectionStatus', 'Stalker is connected');
-          }
-        });
+
 
       }
       else {
-        console.log("disconnect request received")
+        console.log("disconnect request received");
+        pubsub.publish(global.rovervelocity_command, "0");
         pubsub.publish(global.roverconnection_command, "disconnect");
-        pubsub.subscribe(global.roverconnection_status, function (msg, data) {
-          if (data == "disconnected") {
-            socket.emit('connectionStatus', 'Stalker is not connected');
-          }
-        });
 
+      }
+    });
+    socket.on('velocity', function(data){
+      console.log('velocity change received');
+      pubsub.publish(global.rovervelocity_command, data);
+    });
+    pubsub.subscribe(global.roverconnection_status, function (msg, data) {
+      if (data == "connected") {
+        socket.emit('connectionStatus', 'Stalker is connected');
+      }
+      else if(data == "disconnected") {
+        socket.emit('connectionStatus', 'Stalker is not connected');
       }
     });
   });
@@ -73,30 +77,7 @@ const setConnectionStatus = function (status) {
     });
   }
 }
-const phidgetServer = function () {
-  var conn = new phidget22.Connection(5661, 'raspberrypi.local');
-  pubsub.subscribe(global.roverconnection_command, function (msg, data) {
-    console.log(data)
-    if (data == "connect") {
-      conn.connect().then(function () {
-        console.log('Connection connected');
-        pubsub.publish(global.roverconnection_status, "connected");
-        //	startMotors();
-      }).catch(function (err) {
-        console.log('failed to connect to server:' + err);
-      });
-    }
-    else if (data == "disconnect")
-    {
-      conn.close()
-        pubsub.publish(global.roverconnection_status, "disconnected");
-    }
-  });
-  conn.onDisconnect(function () {
-    pubsub.publish(global.roverconnection_status, "disconnected");
-  });
 
-}
 
 
 //
@@ -109,7 +90,7 @@ socketServer();
 //
 // startup phidget interface for communication with rover
 //
-phidgetServer();
+phidget.phidgetServer();
 /**
  * Normalize a port into a number, string, or false.
  */
