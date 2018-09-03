@@ -57,6 +57,14 @@ const socketServer = function () {
       console.log('velocity change received');
       pubsub.publish(global.rovervelocity_command, data);
     });
+    socket.on('steering', function(data){
+      console.log('steering change received');
+      pubsub.publish(global.roversteering_command, data);
+    });
+    socket.on('motorstatus', function(data){
+      console.log('motorstatus request received');
+      pubsub.publish(global.rovervelocity_statusrequest, 'data');
+    });
     pubsub.subscribe(global.roverconnection_status, function (msg, data) {
       if (data == "connected") {
         socket.emit('connectionStatus', 'Stalker is connected');
@@ -64,6 +72,11 @@ const socketServer = function () {
       else if(data == "disconnected") {
         socket.emit('connectionStatus', 'Stalker is not connected');
       }
+    });
+    pubsub.subscribe(global.rovervelocity_statusreport, function (msg, data) {
+        var responseArray = data;
+        var jsonResponse = JSON.stringify(responseArray);
+        socket.emit('velocityReport', jsonResponse);
     });
   });
 

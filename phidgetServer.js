@@ -44,12 +44,65 @@ exports.phidgetServer = function () {
             velocity = round(newVelocity / 100), 2;
         }
     });
+    pubsub.subscribe(global.rovervelocity_statusrequest, function (msg, data)
+    {
+            getVelocity();
+    });
+    pubsub.subscribe(global.roversteering_command, function (msg, data) {
+        console.log(data);
+        var newVector = data;
+        if (newVector != 0) {
+            newVector = newVector / 100;
+        }
+        if (ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
+            // ch1 and ch2 are the left wheels
+            // ch3 and ch4 are the right wheels
+            console.log('NewVector:' + newVector)
+            var leftNewVelocity = 0;
+            var rightNewVelocity = 0;
+
+            var ch1Velocity = ch1.getTargetVelocity(); //get left side velocity
+            var ch3Velocity = ch3.getTargetVelocity(); // get right side velocity
+            var velocity = ((ch1Velocity > ch3Velocity) ? ch1Velocity : ch3Velocity); // save current velocity 
+            if (newVector == 0) {
+                // go straight
+                ch1.setTargetVelocity(velocity);
+                ch2.setTargetVelocity(velocity);
+                ch3.setTargetVelocity(velocity);
+                ch4.setTargetVelocity(velocity);
+                return;
+            }
+            if (newVector > 0) {
+                // turn right
+                leftNewVelocity = (ch1Velocity + newVector) > 1 ? 1 : ch1Velocity + newVector;
+                //ch2NewVelocity = (ch2Velocity - newVector) < -1 ? -1 : ch2Velocity - newVector;
+                rightNewVelocity = velocity;
+            }
+            else {
+                // turn left, newVector is negative
+                //leftNewVelocity = (ch1Velocity + newVector) < -1 ? -1 : ch1Velocity + newVector;
+                leftNewVelocity = velocity;
+                rightNewVelocity = (ch3Velocity - newVector) > 1 ? 1 : ch3Velocity - newVector;
+            }
+            leftNewVelocity = round(leftNewVelocity, 1);
+            rightNewVelocity = round(rightNewVelocity, 1);
+            console.log('left velocity: ' + leftNewVelocity)
+            console.log('right velocity: ' + rightNewVelocity)
+
+            ch1.setTargetVelocity(leftNewVelocity);
+            ch2.setTargetVelocity(leftNewVelocity);
+            ch3.setTargetVelocity(rightNewVelocity);
+            ch4.setTargetVelocity(rightNewVelocity);
+
+
+        }
+    });
 
 
     var startMotors = function () {
         // left side motors
         ch1.isRemote = true;
-        ch1.setDeviceSerialNumber(485515);
+        ch1.setDeviceSerialNumber(486536);
         ch1.setChannel(0);
         ch1.onAttach = function () {
             console.log("Motor 0 attached");
@@ -59,7 +112,7 @@ exports.phidgetServer = function () {
         }
 
         ch2.isRemote = true;
-        ch2.setDeviceSerialNumber(485515);
+        ch2.setDeviceSerialNumber(486536);
         ch2.setChannel(1);
         ch2.onAttach = function () {
             console.log("Motor 1 attached");
@@ -69,7 +122,7 @@ exports.phidgetServer = function () {
 
         }
         ch3.isRemote = true;
-        ch3.setDeviceSerialNumber(486536);
+        ch3.setDeviceSerialNumber(485515);
         ch3.setChannel(0);
         ch3.onAttach = function () {
             console.log("Motor 2 attached");
@@ -79,7 +132,7 @@ exports.phidgetServer = function () {
 
         }
         ch4.isRemote = true;
-        ch4.setDeviceSerialNumber(486536);
+        ch4.setDeviceSerialNumber(485515);
         ch4.setChannel(1);
         ch4.onAttach = function () {
             console.log("Motor 3 attached");
@@ -137,6 +190,27 @@ exports.phidgetServer = function () {
         });
 
 
+    }
+    var getVelocity = function () {
+        var responseArray = new Array(4);
+        if (ch1.getAttached()) {
+            velocity = ch1.getTargetVelocity();
+            responseArray[0] = velocity;
+           
+        }
+        if (ch2.getAttached()) {
+            velocity = ch2.getTargetVelocity();
+            responseArray[1] = velocity;
+        } 
+        if (ch3.getAttached()) {
+            velocity = ch3.getTargetVelocity();
+            responseArray[2] = velocity;
+        } 
+        if (ch4.getAttached()) {
+            velocity = ch4.getTargetVelocity();
+           responseArray[3] = velocity;
+        }
+        pubsub.publish(global.rovervelocity_statusreport, responseArray);
     }
     function round(value, precision) {
         var multiplier = Math.pow(10, precision || 0);

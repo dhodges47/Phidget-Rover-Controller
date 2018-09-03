@@ -229,10 +229,10 @@ input[type=range]:focus::-ms-fill-upper {
 
 /* end styles for slider */
 
-/* make label line up with sider. Doesn't work in firefox */
+/* make label line up with sider.  */
 
 .sliderLabel {
-    margin: 13.8px 0;
+    text-align: center;
 }
 
 /* style the output variable from the slider */
@@ -240,4 +240,26 @@ input[type=range]:focus::-ms-fill-upper {
 .outputVariable {
     font-size: larger;
     font-weight: bold;
+}
+.Row
+{
+    display: table;
+    width: 100%; /*Optional*/
+    table-layout: fixed; /*Optional*/
+    border-spacing: 10px; /*Optional*/
+}
+.Column
+{
+    display: table-cell;
+    vertical-align: middle;
+}
+.ColumnSm
+{
+    display: table-cell;
+    width: 100px;
+    vertical-align: middle;
+    font-size: larger;
+    font-weight: bold;
+    text-align: center;
+   
 }
