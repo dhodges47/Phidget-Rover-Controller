@@ -58,17 +58,25 @@
                 var b1 = socket.connected;
                 $('#ledConnectionStatus').attr('class', 'led-yellow');
                 socket.emit('connectStalker', 'true');
-                $('#sliderVelocity').val(0);
-                $('#sliderSteering').val(0);
+                resetSliders();
                 return false;
             };
             btnDisConnect_onClick = function () {
                 $('#ledConnectionStatus').attr('class', 'led-yellow');
                 socket.emit('connectStalker', { setting: 'false' });
+                resetSliders();
                 return false;
             };
             btnGetMotorStatus_onClick = function () {
                 socket.emit('motorstatus', '');
+            };
+            btnStopMotor_onClick = function () {
+                socket.emit('steering', '0');
+                socket.emit('velocity', '0')
+                setTimeout(() => {
+                    socket.emit('motorstatus', '');
+                }, 250);
+                resetSliders();
             };
             $('#sliderVelocity').change(function () {
                 var newVelocity = $(this).val();
@@ -94,7 +102,13 @@
             else {
                 $('#ledConnectionStatus').attr('class', 'led-red');
             }
-        }
+        };
+        resetSliders = function () {
+            document.getElementById("sliderVelocity").value = "0";
+            document.getElementById("sliderSteering").value = "0";
+            document.getElementById("velocity").value = "";
+            document.getElementById("steerVector").value = "";
+        };
     </script>
     <div class="container">
         <h1>Hello Stalker!</h1>
@@ -111,6 +125,7 @@
                 <button type="button" id="btnConnect" onclick="btnConnect_onClick();">Connect to Stalker</button>
                 <button type="button" id="btnDisConnect" onclick="btnDisConnect_onClick();">DisConnect Stalker</button>
                 <button type="button" id="btngetMotorStatus" onclick="btnGetMotorStatus_onClick();">Update Motor Status</button>
+                <button type="button" id="btnstopMotor" onclick="btnStopMotor_onClick();">Stop Stalker</button>
 
             </div>
         </div>
@@ -120,11 +135,11 @@
                 <span id="lblMotorOneStatus"></span>
 
             </div>
-            <div  class="col-lg-3">
+            <div class="col-lg-3">
                 <label>Motor Two</label>
                 <span id="lblMotorTwoStatus"></span>
             </div>
-            <div  class="col-lg-3">
+            <div class="col-lg-3">
                 <label>Motor Three</label>
                 <span id="lblMotorThreeStatus"></span>
             </div>
@@ -144,7 +159,7 @@
                 <div class="ColumnSm">
                 </div>
             </div>
-
+            <!--sliders are the html5 range control: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/range -->
             <div class="Row">
                 <div class="ColumnSm">
 
