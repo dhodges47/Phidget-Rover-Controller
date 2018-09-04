@@ -76,7 +76,7 @@
                 setTimeout(() => {
                     socket.emit('motorstatus', '');
                 }, 250);
-                
+
             });
             $('#sliderSteering').change(function () {
                 var newSteering = $(this).val();
@@ -98,32 +98,40 @@
     </script>
     <div class="container">
         <h1>Hello Stalker!</h1>
+        <div class="row">
+            <div class="col-lg">
 
-        <div class="led-box">
-            <div id="ledConnectionStatus" class="led-red"></div>
-            <p>Stalker Connection Status</p>
-        </div>
-        <div style='clear:both; height:20px;'></div>
 
-        <button type="button" id="btnConnect" onclick="btnConnect_onClick();">Connect to Stalker</button>
-        <button type="button" id="btnDisConnect" onclick="btnDisConnect_onClick();">DisConnect Stalker</button>
-        <button type="button" id="btngetMotorStatus" onclick="btnGetMotorStatus_onClick();">Update Motor Status</button>
-        <div>
-            <h3>Motor One</h3>
-            <span id="lblMotorOneStatus"></span>
+                <div class="led-box">
+                    <div id="ledConnectionStatus" class="led-red"></div>
+                    <p>Stalker Connection Status</p>
+                </div>
+                <div style='clear:both; height:20px;'></div>
 
+                <button type="button" id="btnConnect" onclick="btnConnect_onClick();">Connect to Stalker</button>
+                <button type="button" id="btnDisConnect" onclick="btnDisConnect_onClick();">DisConnect Stalker</button>
+                <button type="button" id="btngetMotorStatus" onclick="btnGetMotorStatus_onClick();">Update Motor Status</button>
+
+            </div>
         </div>
-        <div>
-            <h3>Motor Two</h3>
-            <span id="lblMotorTwoStatus"></span>
-        </div>
-        <div>
-            <h3>Motor Three</h3>
-            <span id="lblMotorThreeStatus"></span>
-        </div>
-        <div>
-            <h3>Motor Four</h3>
-            <span id="lblMotorFourStatus"></span>
+        <div class="row">
+            <div class="col-lg-3">
+                <label>Motor One</label>
+                <span id="lblMotorOneStatus"></span>
+
+            </div>
+            <div  class="col-lg-3">
+                <label>Motor Two</label>
+                <span id="lblMotorTwoStatus"></span>
+            </div>
+            <div  class="col-lg-3">
+                <label>Motor Three</label>
+                <span id="lblMotorThreeStatus"></span>
+            </div>
+            <div class="col-lg-3">
+                <label>Motor Four</label>
+                <span id="lblMotorFourStatus"></span>
+            </div>
         </div>
         <h3>Velocity:</h3>
         <form id="form1" oninput="velocity.value = sliderVelocity.valueAsNumber">

@@ -24,7 +24,7 @@ exports.phidgetServer = function () {
             });
         }
         else if (data == "disconnect") {
-            conn.close()
+            conn.close();
             console.log('Phidget Server Disconnected');
             pubsub.publish(global.roverconnection_status, "disconnected");
         }
@@ -38,7 +38,7 @@ exports.phidgetServer = function () {
     pubsub.subscribe(global.rovervelocity_command, function (msg, data) {
         console.log(data);
         var newVelocity = data;
-        if (ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
+        if (conn.connected && ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
             velocity = math.round(math.divide(newVelocity, 100), 2);
             ch1.setTargetVelocity(velocity);
             ch2.setTargetVelocity(velocity);
@@ -55,7 +55,7 @@ exports.phidgetServer = function () {
         if (newVector != 0) {
             newVector = math.round(math.divide(newVector, 100), 2);
         }
-        if (ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
+        if (conn.connected && ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
             // ch1 and ch2 are the left wheels
             // ch3 and ch4 are the right wheels
             console.log('NewVector:' + newVector)
@@ -75,14 +75,14 @@ exports.phidgetServer = function () {
             }
             if (newVector > 0) {
                 // turn right
-                leftNewVelocity = math.round(math.add(ch1Velocity + newVector), 2);
+                leftNewVelocity = math.round(math.add(ch1Velocity, newVector), 2);
                 leftNewVelocity = leftNewVelocity > 1 ? 1 : leftNewVelocity;
                 rightNewVelocity = velocity;
             }
             else {
                 // turn left, newVector is negative
                 leftNewVelocity = velocity;
-                rightNewVelocity = math.round(math.add(ch3Velocity - newVector), 2);
+                rightNewVelocity = math.round(math.add(ch3Velocity, newVector), 2);
                 rightNewVelocity = rightNewVelocity > 1 ? 1 : rightNewVelocity;
             }
             console.log('left velocity: ' + leftNewVelocity)
@@ -92,12 +92,8 @@ exports.phidgetServer = function () {
             ch2.setTargetVelocity(leftNewVelocity);
             ch3.setTargetVelocity(rightNewVelocity);
             ch4.setTargetVelocity(rightNewVelocity);
-
-
         }
     });
-
-
     var startMotors = function () {
         // left side motors
         ch1.isRemote = true;
@@ -145,7 +141,7 @@ exports.phidgetServer = function () {
 
         }).catch(function (err) {
             console.log('failed to open the channel:' + err);
-        });     
+        });
         ch2.open().then(function (ch2) {
             console.log('channel 2 open');
         }).catch(function (err) {
@@ -166,22 +162,24 @@ exports.phidgetServer = function () {
     }
     var getVelocity = function () {
         var responseArray = new Array(4);
-        if (ch1.getAttached()) {
-            velocity = ch1.getTargetVelocity();
-            responseArray[0] = velocity;
+        if (conn.connected) {
+            if (ch1.getAttached()) {
+                velocity = ch1.getTargetVelocity();
+                responseArray[0] = velocity;
 
-        }
-        if (ch2.getAttached()) {
-            velocity = ch2.getTargetVelocity();
-            responseArray[1] = velocity;
-        }
-        if (ch3.getAttached()) {
-            velocity = ch3.getTargetVelocity();
-            responseArray[2] = velocity;
-        }
-        if (ch4.getAttached()) {
-            velocity = ch4.getTargetVelocity();
-            responseArray[3] = velocity;
+            }
+            if (ch2.getAttached()) {
+                velocity = ch2.getTargetVelocity();
+                responseArray[1] = velocity;
+            }
+            if (ch3.getAttached()) {
+                velocity = ch3.getTargetVelocity();
+                responseArray[2] = velocity;
+            }
+            if (ch4.getAttached()) {
+                velocity = ch4.getTargetVelocity();
+                responseArray[3] = velocity;
+            }
         }
         pubsub.publish(global.rovervelocity_statusreport, responseArray);
     }
