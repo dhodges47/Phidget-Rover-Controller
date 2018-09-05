@@ -42,7 +42,6 @@
             });
             socket.on('velocityReport', function (data) {
                 var velocityArray = JSON.parse(data);
-                console.log(velocityArray);
                 $('#lblMotorOneStatus').text(velocityArray[0]);
                 $('#lblMotorTwoStatus').text(velocityArray[1]);
                 $('#lblMotorThreeStatus').text(velocityArray[2]);
@@ -78,6 +77,14 @@
                 }, 250);
                 resetSliders();
             };
+            btnCancelSteering_onClick = function () {
+                socket.emit('steering', 0);
+                setTimeout(() => {
+                    socket.emit('motorstatus', '');
+                }, 250);
+                document.getElementById("sliderSteering").value = "0";
+                document.getElementById("steerVector").value = "";
+            };
             $('#sliderVelocity').change(function () {
                 var newVelocity = $(this).val();
                 socket.emit('velocity', newVelocity)
@@ -88,6 +95,7 @@
             });
             $('#sliderSteering').change(function () {
                 var newSteering = $(this).val();
+                console.log('New steering vector is ' + newSteering)
                 socket.emit('steering', newSteering);
                 setTimeout(() => {
                     socket.emit('motorstatus', '');
@@ -124,27 +132,27 @@
 
                 <button type="button" id="btnConnect" onclick="btnConnect_onClick();">Connect to Stalker</button>
                 <button type="button" id="btnDisConnect" onclick="btnDisConnect_onClick();">DisConnect Stalker</button>
-                <button type="button" id="btngetMotorStatus" onclick="btnGetMotorStatus_onClick();">Update Motor Status</button>
+                <button type="button" id="btngetMotorStatus" onclick="btnCancelSteering_onClick();">Cancel Steering</button>
                 <button type="button" id="btnstopMotor" onclick="btnStopMotor_onClick();">Stop Stalker</button>
 
             </div>
         </div>
         <div class="row">
             <div class="col-lg-3">
-                <label>Motor One</label>
+                <label>Motor One (right front)</label>
                 <span id="lblMotorOneStatus"></span>
 
             </div>
             <div class="col-lg-3">
-                <label>Motor Two</label>
+                <label>Motor Two (right rear)</label>
                 <span id="lblMotorTwoStatus"></span>
             </div>
             <div class="col-lg-3">
-                <label>Motor Three</label>
+                <label>Motor Three (left front)</label>
                 <span id="lblMotorThreeStatus"></span>
             </div>
             <div class="col-lg-3">
-                <label>Motor Four</label>
+                <label>Motor Four(left rear)</label>
                 <span id="lblMotorFourStatus"></span>
             </div>
         </div>
@@ -166,32 +174,32 @@
                     <span class="sliderLabel"></span>Backwards</span>
                 </div>
                 <div class="Column"><input id="sliderVelocity" name="sliderVelocity" type="range" min="-100" max="100" step="1"
-                        value="0" list="listTicks" />
+                        value="0" list="tickmarks" />
                 </div>
                 <div class="ColumnSm"> <span class="sliderLabel"> Forwards</span>
                 </div>
             </div>
-            <datalist id="listTicks">
+            <datalist id="tickmarks">
                 <option label="Stopped">0</option>
-
+                <option>-10</option>
                 <option>-20</option>
-
+                <option>-30</option>
                 <option>-40</option>
-
+                <option>-50</option>
                 <option>-60</option>
-
+                <option>-70</option>
                 <option>-80</option>
-
+                <option>-90</option>
                 <option>-100</option>
-
-                <option>20</option>
-
+                <option>10</option>
+                <option value="20">
+                <option>30</option>
                 <option>40</option>
-
+                <option>50</option>
                 <option>60</option>
-
+                <option>70</option>
                 <option>80</option>
-
+                <option>90</option>
                 <option>100</option>
             </datalist>
 
@@ -217,7 +225,7 @@
                         <span class="sliderLabel"></span>Left</span>
                     </div>
                     <div class="Column">
-                        <input id="sliderSteering" name="sliderSteering" type="range" min="-5" max="5" step="1" value="0" />
+                        <input id="sliderSteering" name="sliderSteering" type="range" min="-10" max="10" step=".1" value="0" />
                     </div>
                     <div class="ColumnSm">
 

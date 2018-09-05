@@ -7,6 +7,7 @@ const ch1 = new phidget22.DCMotor();
 const ch2 = new phidget22.DCMotor();
 const ch3 = new phidget22.DCMotor();
 const ch4 = new phidget22.DCMotor();
+var velocity = 0.00; // current velocity before steering adjustments
 exports.phidgetServer = function () {
     var conn = new phidget22.Connection(5661, 'raspberrypi.local');
     //
@@ -19,12 +20,14 @@ exports.phidgetServer = function () {
                 console.log('Phidget Server Connected');
                 pubsub.publish(global.roverconnection_status, "connected");
                 startMotors();
+                velocity=0.00;
             }).catch(function (err) {
                 console.log('failed to connect to server:' + err);
             });
         }
         else if (data == "disconnect") {
             conn.close();
+            velocity=0.00;
             console.log('Phidget Server Disconnected');
             pubsub.publish(global.roverconnection_status, "disconnected");
         }
@@ -36,14 +39,13 @@ exports.phidgetServer = function () {
     // Respond to commands to the motors
     //
     pubsub.subscribe(global.rovervelocity_command, function (msg, data) {
-        console.log(data);
-        var newVelocity = data;
         if (conn.connected && ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
-            velocity = math.round(math.divide(newVelocity, 100), 2);
+            velocity = math.round(math.divide(data, 100), 2);// save current velocity in global variable for steering reference point
             ch1.setTargetVelocity(velocity);
             ch2.setTargetVelocity(velocity);
             ch3.setTargetVelocity(velocity);
             ch4.setTargetVelocity(velocity);
+            console.log('Velocity change received, new Velocity is ' + velocity);
         }
     });
     pubsub.subscribe(global.rovervelocity_statusrequest, function (msg, data) {
@@ -53,45 +55,48 @@ exports.phidgetServer = function () {
         console.log(data);
         var newVector = data;
         if (newVector != 0) {
-            newVector = math.round(math.divide(newVector, 100), 2);
+            newVector = math.round(math.divide(newVector, 50), 2);
         }
         if (conn.connected && ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
-            // ch1 and ch2 are the left wheels
-            // ch3 and ch4 are the right wheels
+            // ch1 and ch2 are the right wheels
+            // ch3 and ch4 are the left wheels
             console.log('NewVector:' + newVector)
             var leftNewVelocity = 0.00;
             var rightNewVelocity = 0.00;
 
-            var ch1Velocity = ch1.getTargetVelocity(); //get left side velocity
-            var ch3Velocity = ch3.getTargetVelocity(); // get right side velocity
-            var velocity = ((ch1Velocity > ch3Velocity) ? ch3Velocity : ch1Velocity); // save current velocity based on slowest wheel
             if (newVector == 0) {
-                // go straight
+                // go straight at last registered velocity
                 ch1.setTargetVelocity(velocity);
                 ch2.setTargetVelocity(velocity);
                 ch3.setTargetVelocity(velocity);
                 ch4.setTargetVelocity(velocity);
                 return;
             }
-            if (newVector > 0) {
-                // turn right
-                leftNewVelocity = math.round(math.add(ch1Velocity, newVector), 2);
-                leftNewVelocity = leftNewVelocity > 1 ? 1 : leftNewVelocity;
-                rightNewVelocity = velocity;
+            else if (newVector < 0) {
+                // turn left
+                newVector = math.abs(newVector);
+                console.log('left turn, vector is ' + newVector);
+                rightNewVelocity = math.round(math.add(velocity, newVector), 2);
+                rightNewVelocity = rightNewVelocity > 1 ? 1 : rightNewVelocity;
+                //leftNewVelocity = velocity;
+                leftNewVelocity = 0;
+                console.log('Turning left, global velocity is ' + velocity);
             }
             else {
-                // turn left, newVector is negative
-                leftNewVelocity = velocity;
-                rightNewVelocity = math.round(math.add(ch3Velocity, newVector), 2);
-                rightNewVelocity = rightNewVelocity > 1 ? 1 : rightNewVelocity;
+                // turn right, newVector is negative
+                //rightNewVelocity = velocity;
+                rightNewVelocity = 0;
+                leftNewVelocity = math.round(math.add(velocity, newVector), 2);
+                leftNewVelocity = leftNewVelocity > 1 ? 1 : leftNewVelocity;
+                console.log('Turning right, global velocity is ' + velocity);
             }
             console.log('left velocity: ' + leftNewVelocity)
             console.log('right velocity: ' + rightNewVelocity)
 
-            ch1.setTargetVelocity(leftNewVelocity);
-            ch2.setTargetVelocity(leftNewVelocity);
-            ch3.setTargetVelocity(rightNewVelocity);
-            ch4.setTargetVelocity(rightNewVelocity);
+            ch1.setTargetVelocity(rightNewVelocity);
+            ch2.setTargetVelocity(rightNewVelocity);
+            ch3.setTargetVelocity(leftNewVelocity);
+            ch4.setTargetVelocity(leftNewVelocity);
         }
     });
     var startMotors = function () {
@@ -164,21 +169,21 @@ exports.phidgetServer = function () {
         var responseArray = new Array(4);
         if (conn.connected) {
             if (ch1.getAttached()) {
-                velocity = ch1.getTargetVelocity();
-                responseArray[0] = velocity;
+                _velocity = ch1.getTargetVelocity();
+                responseArray[0] = _velocity;
 
             }
             if (ch2.getAttached()) {
-                velocity = ch2.getTargetVelocity();
-                responseArray[1] = velocity;
+                _velocity = ch2.getTargetVelocity();
+                responseArray[1] = _velocity;
             }
             if (ch3.getAttached()) {
-                velocity = ch3.getTargetVelocity();
-                responseArray[2] = velocity;
+                _velocity = ch3.getTargetVelocity();
+                responseArray[2] = _velocity;
             }
             if (ch4.getAttached()) {
-                velocity = ch4.getTargetVelocity();
-                responseArray[3] = velocity;
+                _velocity = ch4.getTargetVelocity();
+                responseArray[3] = _velocity;
             }
         }
         pubsub.publish(global.rovervelocity_statusreport, responseArray);
