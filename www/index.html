@@ -85,21 +85,30 @@
                 document.getElementById("sliderSteering").value = "0";
                 document.getElementById("steerVector").value = "";
             };
-            $('#sliderVelocity').change(function () {
+            $('#sliderVelocity').on('input', function () {
                 var newVelocity = $(this).val();
+                if(newVelocity < 7 && newVelocity > -7)
+                {
+                    newVelocity = 0;
+                }
                 socket.emit('velocity', newVelocity)
                 setTimeout(() => {
                     socket.emit('motorstatus', '');
                 }, 250);
 
             });
-            $('#sliderSteering').change(function () {
+            $('#sliderSteering').on('input',function () {
                 var newSteering = $(this).val();
                 console.log('New steering vector is ' + newSteering)
-                socket.emit('steering', newSteering);
+                if (newSteering < 1 && newSteering > -1) {
+                    newSteering = 0;
+                    document.getElementById("sliderSteering").value = "0";
+                }
+               socket.emit('steering', newSteering);
                 setTimeout(() => {
                     socket.emit('motorstatus', '');
                 }, 250);
+                
             });
             console.log("ready!");
         });
