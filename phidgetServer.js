@@ -74,21 +74,29 @@ exports.phidgetServer = function () {
             }
             else if (newVector < 0) {
                 // turn left
-                newVector = math.abs(newVector);
+                if (velocity >= 0)
+                {
+                   newVector = math.abs(newVector);
+                }
                 console.log('left turn, vector is ' + newVector);
                 rightNewVelocity = math.round(math.add(velocity, newVector), 2);
                 rightNewVelocity = rightNewVelocity > 1 ? 1 : rightNewVelocity;
-                //leftNewVelocity = velocity;
                 leftNewVelocity = 0;
                 console.log('Turning left, global velocity is ' + velocity);
+                console.log('Turning left, new right velocity is ' + rightNewVelocity);
             }
             else {
-                // turn right, newVector is negative
-                //rightNewVelocity = velocity;
+                // turn right
+                if (velocity < 0)
+                {
+                    newVector = - newVector;
+                }
+                console.log('right turn, vector is ' + newVector);
                 rightNewVelocity = 0;
                 leftNewVelocity = math.round(math.add(velocity, newVector), 2);
                 leftNewVelocity = leftNewVelocity > 1 ? 1 : leftNewVelocity;
                 console.log('Turning right, global velocity is ' + velocity);
+                console.log('Turning right, new left velocity is ' + leftNewVelocity);
             }
             console.log('left velocity: ' + leftNewVelocity)
             console.log('right velocity: ' + rightNewVelocity)
