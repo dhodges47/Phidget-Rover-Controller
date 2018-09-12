@@ -26,6 +26,24 @@
 <body>
 
     <script>
+        var hasGP = false; // has Gampepad
+        var repGP; // timer for Gamepad
+        var bStalkerIsConnected = false;
+        // transport object for the Gampad values we are interested in
+        // supports buttons and the two axes
+        // (doesn't support triggers and other functions)
+        var GPTransport = {};
+        // buttons
+        GPTransport.ButtonA = "";
+        GPTransport.ButtonB = "";
+        GPTransport.ButtonX = "";
+        GPTransport.ButtonY = "";
+        // axes (ie thumbsticks)
+        GPTransport.LeftX = 0.00;
+        GPTransport.LeftY = 0.00;
+        GPTransport.RightX = 0.00;
+        GPTransport.RightY = 0.00;
+        var GPTransportCurrent = {}; // current parameters that have already been sent to the robot
         $(function () {
 
             const socket = io('http://localhost:3000');
@@ -57,6 +75,7 @@
                 var b1 = socket.connected;
                 $('#ledConnectionStatus').attr('class', 'led-yellow');
                 socket.emit('connectStalker', 'true');
+                startGamePad();
                 resetSliders();
                 return false;
             };
@@ -87,8 +106,7 @@
             };
             $('#sliderVelocity').on('input', function () {
                 var newVelocity = $(this).val();
-                if(newVelocity < 7 && newVelocity > -7)
-                {
+                if (newVelocity < 7 && newVelocity > -7) {
                     newVelocity = 0;
                 }
                 socket.emit('velocity', newVelocity)
@@ -97,27 +115,104 @@
                 }, 250);
 
             });
-            $('#sliderSteering').on('input',function () {
+            $('#sliderSteering').on('input', function () {
                 var newSteering = $(this).val();
                 console.log('New steering vector is ' + newSteering)
                 if (newSteering < 1 && newSteering > -1) {
                     newSteering = 0;
                     document.getElementById("sliderSteering").value = "0";
                 }
-               socket.emit('steering', newSteering);
+                socket.emit('steering', newSteering);
                 setTimeout(() => {
                     socket.emit('motorstatus', '');
                 }, 250);
-                
+
             });
+
+            //
+            // handlers for GamePad
+            //
+            function startGamePad() {
+                if (canGame()) {
+
+                    var prompt = "To begin using your gamepad, connect it and press any button!";
+                    $("#gamepadPrompt").text(prompt);
+
+                    $(window).on("gamepadconnected", function () {
+                        hasGP = true;
+                        $("#gamepadPrompt").html("Gamepad connected!");
+                        console.log("Gamepad connection event");
+                        repGP = window.setInterval(reportOnGamepad, 500);
+                    });
+
+                    $(window).on("gamepaddisconnected", function () {
+                        console.log("Gamepad disconnection event");
+                        $("#gamepadPrompt").text(prompt);
+                        window.clearInterval(repGP);
+                        GPTransportCurrent = {};
+                    });
+
+                    //setup an interval for Chrome
+                    /* var checkGP = window.setInterval(function () {
+                         console.log('checkGP');
+                         if (navigator.getGamepads()[0]) {
+                             if (!hasGP) $(window).trigger("gamepadconnected");
+                             window.clearInterval(checkGP);
+                         }
+                     }, 500);
+                     */
+                }
+            }
+            function reportOnGamepad() {
+                console.log("In reportOnGamePad");
+                var gp = navigator.getGamepads()[0];
+                if (gp) {
+                    console.log("Gamepad found");
+                    for (var i = 11; i <= 14; i++) {
+                        switch (i) {
+                            case 11:
+                                GPTransport.ButtonA = (gp.buttons[i].pressed) ? true : false;
+                                break;
+                            case 12:
+                                GPTransport.ButtonB = (gp.buttons[i].pressed) ? true : false;
+                                break;
+                            case 13:
+                                GPTransport.ButtonX = (gp.buttons[i].pressed) ? true : false;
+                                break;
+                            case 14:
+                                GPTransport.ButtonY = (gp.buttons[i].pressed) ? true : false;
+                                break;
+                        }
+                    }
+                    GPTransport.LeftX = gp.axes[1];
+                    GPTransport.LeftY = gp.axes[2];
+                    GPTransport.RightX = gp.axes[3];
+                    GPTransport.RightY = gp.axes[4];
+                    var sGPTransport = JSON.stringify(GPTransport);
+                    var sGPTransportCurrent = JSON.stringify(GPTransportCurrent);
+                    if (bStalkerIsConnected) {
+                        //if (sGPTransport != sGPTransportCurrent) {
+                        console.log("sending GP to server");
+                        GampePadSocket(GPTransport); // send to server
+                        GPTransportCurrent = GPTransport; //save object so we won't send exact same parameters again
+                       // }
+                        
+                    }
+                }
+            }
+            function GampePadSocket(objGP) {
+                socket.emit('GamePad', JSON.stringify(objGP));
+            }
             console.log("ready!");
         });
         UpdateStalkerConnectionStatus = function (data) {
             if (data == "Stalker is connected") {
                 $('#ledConnectionStatus').attr('class', 'led-green');
+                bStalkerIsConnected = true;
             }
             else {
                 $('#ledConnectionStatus').attr('class', 'led-red');
+                bStalkerIsConnected = false;
             }
         };
         resetSliders = function () {
@@ -126,9 +221,15 @@
             document.getElementById("velocity").value = "";
             document.getElementById("steerVector").value = "";
         };
+        function canGame() {
+            return "getGamepads" in navigator;
+        }
+
     </script>
     <div class="container">
         <h1>Hello Stalker!</h1>
+        <div id="gamepadPrompt"></div>
+        <div id="gamepadDisplay"></div>
         <div class="row">
             <div class="col-lg">
 
@@ -182,8 +283,8 @@
 
                     <span class="sliderLabel"></span>Backwards</span>
                 </div>
-                <div class="Column"><input id="sliderVelocity" name="sliderVelocity" type="range" min="-100" max="100" step="1"
-                        value="0" list="tickmarks" />
+                <div class="Column"><input id="sliderVelocity" name="sliderVelocity" type="range" min="-100" max="100"
+                        step="1" value="0" list="tickmarks" />
                 </div>
                 <div class="ColumnSm"> <span class="sliderLabel"> Forwards</span>
                 </div>
@@ -234,7 +335,8 @@
                         <span class="sliderLabel"></span>Left</span>
                     </div>
                     <div class="Column">
-                        <input id="sliderSteering" name="sliderSteering" type="range" min="-10" max="10" step=".1" value="0" />
+                        <input id="sliderSteering" name="sliderSteering" type="range" min="-10" max="10" step=".1"
+                            value="0" />
                     </div>
                     <div class="ColumnSm">
 

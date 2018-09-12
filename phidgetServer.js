@@ -7,6 +7,7 @@ const ch1 = new phidget22.DCMotor();
 const ch2 = new phidget22.DCMotor();
 const ch3 = new phidget22.DCMotor();
 const ch4 = new phidget22.DCMotor();
+
 var velocity = 0.00; // current velocity before steering adjustments
 exports.phidgetServer = function () {
     var conn = new phidget22.Connection(5661, 'raspberrypi.local');
@@ -20,14 +21,14 @@ exports.phidgetServer = function () {
                 console.log('Phidget Server Connected');
                 pubsub.publish(global.roverconnection_status, "connected");
                 startMotors();
-                velocity=0.00;
+                velocity = 0.00;
             }).catch(function (err) {
                 console.log('failed to connect to server:' + err);
             });
         }
         else if (data == "disconnect") {
             conn.close();
-            velocity=0.00;
+            velocity = 0.00;
             console.log('Phidget Server Disconnected');
             pubsub.publish(global.roverconnection_status, "disconnected");
         }
@@ -40,12 +41,15 @@ exports.phidgetServer = function () {
     //
     pubsub.subscribe(global.rovervelocity_command, function (msg, data) {
         if (conn.connected && ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
-            velocity = math.round(math.divide(data, 100), 2);// save current velocity in global variable for steering reference point
-            ch1.setTargetVelocity(velocity);
-            ch2.setTargetVelocity(velocity);
-            ch3.setTargetVelocity(velocity);
-            ch4.setTargetVelocity(velocity);
-            console.log('Velocity change received, new Velocity is ' + velocity);
+            var newvelocity = math.round(math.divide(data, 100), 2);// save current velocity in global variable for steering reference point
+            if (newvelocity != velocity) {
+                velocity = newvelocity;
+                ch1.setTargetVelocity(velocity);
+                ch2.setTargetVelocity(velocity);
+                ch3.setTargetVelocity(velocity);
+                ch4.setTargetVelocity(velocity);
+                console.log('Velocity change received, new Velocity is ' + velocity);
+            }
         }
     });
     pubsub.subscribe(global.rovervelocity_statusrequest, function (msg, data) {
@@ -53,30 +57,31 @@ exports.phidgetServer = function () {
     });
     pubsub.subscribe(global.roversteering_command, function (msg, data) {
         console.log(data);
-        var newVector = data;
+        var newVector = math.number(data);
         if (newVector != 0) {
             newVector = math.round(math.divide(newVector, 50), 2);
         }
         if (conn.connected && ch1.getAttached() && ch2.getAttached() && ch3.getAttached() && ch4.getAttached()) {
             // ch1 and ch2 are the right wheels
             // ch3 and ch4 are the left wheels
-            console.log('NewVector:' + newVector)
+            console.log('NewVector: ' + newVector)
             var leftNewVelocity = 0.00;
             var rightNewVelocity = 0.00;
 
             if (newVector == 0) {
                 // go straight at last registered velocity
+
                 ch1.setTargetVelocity(velocity);
                 ch2.setTargetVelocity(velocity);
                 ch3.setTargetVelocity(velocity);
                 ch4.setTargetVelocity(velocity);
+                console.log("NewVector is 0, returning");
                 return;
             }
             else if (newVector < 0) {
                 // turn left
-                if (velocity >= 0)
-                {
-                   newVector = math.abs(newVector);
+                if (velocity >= 0) {
+                    newVector = math.abs(newVector);
                 }
                 console.log('left turn, vector is ' + newVector);
                 rightNewVelocity = math.round(math.add(velocity, newVector), 2);
@@ -87,8 +92,7 @@ exports.phidgetServer = function () {
             }
             else {
                 // turn right
-                if (velocity < 0)
-                {
+                if (velocity < 0) {
                     newVector = - newVector;
                 }
                 console.log('right turn, vector is ' + newVector);

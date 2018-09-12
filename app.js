@@ -2,6 +2,8 @@ const express = require('express')
 const pubsub = require('pubsub-js');
 const global = require('./constants');
 const phidget = require('./phidgetServer');
+const math = require('mathjs'); // for accurate math 
+
 const app = express()
 var debug = require('debug')('stalker:server');
 const url = require('url');
@@ -53,30 +55,60 @@ const socketServer = function () {
 
       }
     });
-    socket.on('velocity', function(data){
+    socket.on('velocity', function (data) {
       console.log('velocity change received');
-      pubsub.publish(global.rovervelocity_command, data);
+      var v = math.round(data, 2);
+      pubsub.publish(global.rovervelocity_command, v);
     });
-    socket.on('steering', function(data){
+    socket.on('steering', function (data) {
       console.log('steering change received');
-      pubsub.publish(global.roversteering_command, data);
+      var v = math.round(data, 2);
+      pubsub.publish(global.roversteering_command, v);
     });
-    socket.on('motorstatus', function(data){
+    socket.on('motorstatus', function (data) {
       console.log('motorstatus request received');
       pubsub.publish(global.rovervelocity_statusrequest, 'data');
+    });
+    socket.on('GamePad', function (data) {
+      // Parse the transport object and push the right pubsub
+      console.log("Got a GampePad socket request");
+      var gpTransport = JSON.parse(data);
+      if (gpTransport.RightY == 0) {
+        console.log('publishing gamePad velocity command of 0');
+        pubsub.publish(global.rovervelocity_command, 0);
+        return;
+      }
+      var velocity = math.round(math.number(- gpTransport.RightY) * 100, 2);//multiple incoming velocity by 100 to match values from the slider
+      console.log("Publishing GampePad Velocity: " + gpTransport.RightY)
+      pubsub.publish(global.rovervelocity_command, velocity);
+      if (math.number(gpTransport.LeftY) == 0) {
+        //console.log("Publishing GampePad Steering: 0")
+       // pubsub.publish(global.roversteering_command, 0);
+      }
+      else {
+        var leftx = math.number(gpTransport.LeftX) * 50; // because the phidgetServer steering routine divides by 50
+        var lefty = math.number(gpTransport.LeftY) * 50;
+        var steeringVectorLength = Math.sqrt(Math.pow(LeftX, 2) + Math.pow(LeftY, 2));
+        steeringVectorLength = math.round(steeringVectorLength, 2);
+        if (!isNaN(steeringVectorLength) && (math.number(gpTransport.RightY) > 0.10 || math.number(gpTransport.RightY) < 0.10)) {
+         // console.log("Publishing GamePadsteering vector: " + steeringVectorLength)
+        //  pubsub.publish(global.roversteering_command, steeringVectorLength);
+        }
+      }
+
     });
     pubsub.subscribe(global.roverconnection_status, function (msg, data) {
       if (data == "connected") {
         socket.emit('connectionStatus', 'Stalker is connected');
       }
-      else if(data == "disconnected") {
+      else if (data == "disconnected") {
         socket.emit('connectionStatus', 'Stalker is not connected');
       }
     });
     pubsub.subscribe(global.rovervelocity_statusreport, function (msg, data) {
-        var responseArray = data;
-        var jsonResponse = JSON.stringify(responseArray);
-        socket.emit('velocityReport', jsonResponse);
+      var responseArray = data;
+      var jsonResponse = JSON.stringify(responseArray);
+      socket.emit('velocityReport', jsonResponse);
     });
   });
 
