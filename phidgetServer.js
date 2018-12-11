@@ -3,10 +3,10 @@ const pubsub = require('pubsub-js');
 const global = require('./constants');
 const math = require('mathjs'); // for accurate math in the steering function
 
-const ch1 = new phidget22.DCMotor();
-const ch2 = new phidget22.DCMotor();
-const ch3 = new phidget22.DCMotor();
-const ch4 = new phidget22.DCMotor();
+const ch1 = new phidget22.DCMotor();// right wheels
+const ch2 = new phidget22.DCMotor();// right wheels
+const ch3 = new phidget22.DCMotor();// left wheels
+const ch4 = new phidget22.DCMotor();// left wheels
 
 var velocity = 0.00; // current velocity before steering adjustments
 exports.phidgetServer = function () {
@@ -122,7 +122,11 @@ exports.phidgetServer = function () {
         ch1.onDetach = function () {
             console.log("Motor 0 detached");
         }
-
+        // TODO handle error on all channels by shutting down the motors
+        ch1.onError = function (errorCode, errorDescription){
+            console.log("Error detected: " + errorDescription);
+            stopAllMotors();
+        }
         ch2.isRemote = true;
         ch2.setDeviceSerialNumber(486536);
         ch2.setChannel(1);
@@ -133,8 +137,12 @@ exports.phidgetServer = function () {
             console.log("Motor 1 detached");
 
         }
+        ch2.onError = function (errorCode, errorDescription){
+            console.log("Error detected: " + errorDescription);
+            stopAllMotors();
+        }
         ch3.isRemote = true;
-        ch3.setDeviceSerialNumber(485515);
+        ch3.setDeviceSerialNumber(487203);
         ch3.setChannel(0);
         ch3.onAttach = function () {
             console.log("Motor 2 attached");
@@ -143,8 +151,12 @@ exports.phidgetServer = function () {
             console.log("Motor 2 detached");
 
         }
+        ch3.onError = function (errorCode, errorDescription){
+            console.log("Error detected: " + errorDescription);
+            stopAllMotors();
+        }
         ch4.isRemote = true;
-        ch4.setDeviceSerialNumber(485515);
+        ch4.setDeviceSerialNumber(487203);
         ch4.setChannel(1);
         ch4.onAttach = function () {
             console.log("Motor 3 attached");
@@ -152,6 +164,10 @@ exports.phidgetServer = function () {
         ch4.onDetach = function () {
             console.log("Motor 3 detached");
 
+        }
+        ch4.onError = function (errorCode, errorDescription){
+            console.log("Error detected: " + errorDescription);
+            stopAllMotors();
         }
         ch1.open().then(function (ch1) {
             console.log('channel 1 open');
@@ -199,5 +215,13 @@ exports.phidgetServer = function () {
             }
         }
         pubsub.publish(global.rovervelocity_statusreport, responseArray);
+    }
+    var stopAllMotors = function () {
+        velocity = 0;
+        ch1.setTargetVelocity(velocity);
+        ch2.setTargetVelocity(velocity);
+        ch3.setTargetVelocity(velocity);
+        ch4.setTargetVelocity(velocity);
+        console.log("All motors stopped");
     }
 }
