@@ -66,6 +66,13 @@
                 $('#lblMotorFourStatus').text(velocityArray[3]);
 
             });
+            socket.on('errorReport', function (data) {
+                var errorMessage = data;
+                $('#lblError').text(errorMessage);
+                socket.emit('motorstatus', '');
+
+
+            });
             sendMessage = function () {
                 socket.emit('chat message', $('#m').val());
                 $('#m').val('');
@@ -196,7 +203,7 @@
                         GampePadSocket(GPTransport); // send to server
                         GPTransportCurrent = GPTransport; //save object so we won't send exact same parameters again
                        // }
-                        
+
                     }
                 }
             }
@@ -245,6 +252,11 @@
                 <button type="button" id="btngetMotorStatus" onclick="btnCancelSteering_onClick();">Cancel Steering</button>
                 <button type="button" id="btnstopMotor" onclick="btnStopMotor_onClick();">Stop Stalker</button>
 
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg">
+                <span id="lblError" class="errorMessage"></span>
             </div>
         </div>
         <div class="row">

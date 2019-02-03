@@ -261,5 +261,12 @@ input[type=range]:focus::-ms-fill-upper {
     font-size: larger;
     font-weight: bold;
     text-align: center;
-   
+
+}
+.errorMessage
+{
+    font-size: larger;
+    font-weight: bold;
+    color: red;
+
 }

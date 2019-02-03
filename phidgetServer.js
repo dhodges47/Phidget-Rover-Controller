@@ -122,10 +122,12 @@ exports.phidgetServer = function () {
         ch1.onDetach = function () {
             console.log("Motor 0 detached");
         }
-        // TODO handle error on all channels by shutting down the motors
+        // Handle error on all channels by shutting down the motors
         ch1.onError = function (errorCode, errorDescription){
             console.log("Error detected: " + errorDescription);
             stopAllMotors();
+            pubsub.publish(global.errorreport, `Error channel 1: ${errorCode}: ${errorDescription}`);
+
         }
         ch2.isRemote = true;
         ch2.setDeviceSerialNumber(486536);
@@ -140,6 +142,8 @@ exports.phidgetServer = function () {
         ch2.onError = function (errorCode, errorDescription){
             console.log("Error detected: " + errorDescription);
             stopAllMotors();
+            pubsub.publish(global.errorreport, `Error channel 2: ${errorCode}: ${errorDescription}`);
+
         }
         ch3.isRemote = true;
         ch3.setDeviceSerialNumber(487203);
@@ -154,6 +158,7 @@ exports.phidgetServer = function () {
         ch3.onError = function (errorCode, errorDescription){
             console.log("Error detected: " + errorDescription);
             stopAllMotors();
+            pubsub.publish(global.errorreport, `Error channel 3: ${errorCode}: ${errorDescription}`);
         }
         ch4.isRemote = true;
         ch4.setDeviceSerialNumber(487203);
@@ -168,6 +173,8 @@ exports.phidgetServer = function () {
         ch4.onError = function (errorCode, errorDescription){
             console.log("Error detected: " + errorDescription);
             stopAllMotors();
+            pubsub.publish(global.errorreport, `Error channel 4: ${errorCode}: ${errorDescription}`);
+
         }
         ch1.open().then(function (ch1) {
             console.log('channel 1 open');

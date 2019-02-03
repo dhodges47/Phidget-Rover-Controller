@@ -2,7 +2,7 @@ const express = require('express')
 const pubsub = require('pubsub-js');
 const global = require('./constants');
 const phidget = require('./phidgetServer');
-const math = require('mathjs'); // for accurate math 
+const math = require('mathjs'); // for accurate math
 
 const app = express()
 var debug = require('debug')('stalker:server');
@@ -40,7 +40,6 @@ const socketServer = function () {
 
   io.on('connection', function (socket) {
     console.log('user connected');
-
     socket.on('connectStalker', function (data) {
       if (data == 'true') {
         console.log("connection request received");
@@ -109,6 +108,11 @@ const socketServer = function () {
       var responseArray = data;
       var jsonResponse = JSON.stringify(responseArray);
       socket.emit('velocityReport', jsonResponse);
+    });
+    pubsub.subscribe(global.errorreport, function (msg, data) {
+      var responseArray = data;
+      var jsonResponse = JSON.stringify(responseArray);
+      socket.emit('errorReport', jsonResponse);
     });
   });
 
@@ -183,6 +187,3 @@ function onError(error) {
       throw error;
   }
 }
-
-
-
