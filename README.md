@@ -1,6 +1,7 @@
 # Phidget-Rover-Controller
 A controller system that uses NodeJS to control a 4-wheel rover robot with Raspberry Pi and Phidget DC Motor Controllers.
 This controller system is written entirely in javascript using Nodejs. It allows you to remote control a 4 wheeled rover usinga web page or a game controller.
+It communicates with the rover using wi-fi.
 
 ![Stalker Rover](/www/Stalker.jpg)
 
@@ -65,6 +66,8 @@ I use express for the web server but very bare-bones. I didn't use the express g
 I use socket.io for two-way communication with the webpage.
 
 I use pubsub.js for messaging within the node app.
+
+The phidgets documentation includes instructions on connecting to the Phidget Network Server on the Pi using wi-fi.
 
 
 **Running the app**
