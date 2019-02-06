@@ -57,6 +57,8 @@ Laptop or Desktop Computer:
     using the address VS Code gives you.
     
     The web page has controls to start and stop the rover, as well as controlling velocity and steering.
+    
+    In this repository, the bulk of the interesting code is in app.js and PhidgetServer.js.
 
 
 **Project Notes**
