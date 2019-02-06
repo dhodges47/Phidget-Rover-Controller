@@ -83,28 +83,26 @@ Then open a browser to http://localhost:3000 to see the controller page.
 
 3. Host server is a NodeJS application with the following functions:
 
-    1. Hosts a web page that has controls for the robot and readouts of the robotâ€™s telemetry
+    - Hosts a web page that has controls for the robot and readouts of the robotâ€™s telemetry
     
-    2. Handles events from the Motor Controllers via the jsPhidget22 interface library
+    - Handles events from the Motor Controllers via the jsPhidget22 interface library
     
-    3. Handles communication with the web page via the sockets.io library
+     - Handles communication with the web page via the sockets.io library
 
 ---
 
 **Web Page Has**
 
-*Start button to make sure rover is online
+  Connect button
+  
+  Stop button
 
-*Sliders for acceleration and velocity
-
-*Some kind of way to indicate steering
-
-*Displays:
-
-    *Connection Status
+  Connection Status
+  
+  Slider for acceleration
+  
+  Slider for steering
     
-    *Velocity on each motor
+  Velocity on each motor
     
-    *acceleration on each motor
-    
-    *voltage on each motor
+  voltage on each motor
