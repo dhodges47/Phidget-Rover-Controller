@@ -25,40 +25,40 @@ Optional PS4-compatible game controller
 
 Connections:
 
-    Connect the ii.5 V LiPo battery to the PCB. From the PCB, connect the 11.5v pads to the two Phidget motor controllers.
+Connect the ii.5 V LiPo battery to the PCB. From the PCB, connect the 11.5v pads to the two Phidget motor controllers.
     
-    Connect the 5v pad to the Raspberry Pi, OR power the Pi using a separate 5v battery back.
+Connect the 5v pad to the Raspberry Pi, OR power the Pi using a separate 5v battery back.
     
-    Connect the Phidget Motor Controllers to the Pi using USB cables. I like these because they retract and don't have to be tied down:
+Connect the Phidget Motor Controllers to the Pi using USB cables. I like these because they retract and don't have to be tied down:
     
-        https://www.amazon.com/gp/product/B002IUKPMS/ref=ppx_yo_dt_b_asin_title_o00__o00_s00?ie=UTF8&psc=1
+https://www.amazon.com/gp/product/B002IUKPMS/ref=ppx_yo_dt_b_asin_title_o00__o00_s00?ie=UTF8&psc=1
 
 **Software**
 
 Raspberry Pi:
 
-    Apache Web Server: https://www.raspberrypi.org/documentation/remote-access/web-server/apache.md
+Apache Web Server: https://www.raspberrypi.org/documentation/remote-access/web-server/apache.md
     
-    Phidget Network Server: https://www.phidgets.com/docs/OS_-_Linux#Phidget_Network_Server
+Phidget Network Server: https://www.phidgets.com/docs/OS_-_Linux#Phidget_Network_Server
     
-    The Phidget Software page has instructions on installing software
+The Phidget Software page has instructions on installing software
     
 Laptop or Desktop Computer:
 
-    I use Visual Studio Code for developing. Install the necessary extensions for NodeJS development.
+- I use Visual Studio Code for developing. Install the necessary extensions for NodeJS development.
     
-    Socket.io
+- Socket.io
     
-    pubsub.js
+- pubsub.js
     
-    If you aren't familiar with Phidget programming, this is a good place to start: https://www.phidgets.com/docs/Software_Overview
+- If you aren't familiar with Phidget programming, this is a good place to start: https://www.phidgets.com/docs/Software_Overview
     
-    You can run the controller software right from Visual Studio Code. It will start a web server, which you can connect to
+- You can run the controller software right from Visual Studio Code. It will start a web server, which you can connect to
     using the address VS Code gives you.
     
-    The web page has controls to start and stop the rover, as well as controlling velocity and steering.
+- The web page has controls to start and stop the rover, as well as controlling velocity and steering.
     
-    In this repository, the bulk of the interesting code is in app.js and PhidgetServer.js.
+- In this repository, the bulk of the interesting code is in app.js and PhidgetServer.js. In the www folder, index.html has the front-end javascript that communicates with the nodejs application.
 
 
 **Project Notes**
