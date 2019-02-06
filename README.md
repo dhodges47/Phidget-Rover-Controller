@@ -1,5 +1,6 @@
 # Phidget-Rover-Controller
-A controller system that uses NodeJS to control a 4-wheel rover robot with Raspberry Pi and Phidget DC Motor Controllers
+A controller system that uses NodeJS to control a 4-wheel rover robot with Raspberry Pi and Phidget DC Motor Controllers.
+This controller system is written entirely in javascript using Nodejs. It allows you to remote control a 4 wheeled rover usinga web page or a game controller.
 
 **Hardware**
 
@@ -15,7 +16,9 @@ Nomad from ServoCity: https://www.servocity.com/nomad This is the rover's chassi
 
 Power Distribution Block (PCB): https://www.amazon.com/gp/product/B01E5AXGV0/ref=ppx_yo_dt_b_asin_title_o01__o00_s00?ie=UTF8&psc=1
 
-Various wires and cable ties
+Various wires and cable ties.
+
+Optional PS4-compatible game controller
 
 Connections:
 
@@ -105,4 +108,6 @@ Then open a browser to http://localhost:3000 to see the controller page.
     
   Velocity on each motor
     
-  voltage on each motor
+  Voltage on each motor
+  
+  The web page will also detect the presence of a PS4-compatible game controller and will allow you to use the left stick for steering and the right stick for velocity.
